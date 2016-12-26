@@ -1,8 +1,4 @@
 
-
-Beautiful thematic maps with ggplot2 (only) {#beautiful-thematic-maps-with-ggplot2-only}
-===========================================
-
 <img src="wp-content/uploads/2016/12/tm-final-map-1.png" width="100%" />
 
 The above *choropleth* was created with `ggplot2` (2.2.0) only. Well,
