@@ -1,3 +1,5 @@
+
+
 Beautiful thematic maps with ggplot2 (only) {#beautiful-thematic-maps-with-ggplot2-only}
 ===========================================
 
@@ -13,7 +15,7 @@ In this blog post, I am going to explain step by step how I (eventually)
 achieved this result – from a very basic, useless, ugly, default map to
 the publication-ready and (in my opinion) highly aesthetic choropleth.
 
-**Table of Contents**
+**Table of contents**:
 
 -   [Reproducibility](#reproducibility)
 -   [Preparations](#preparations)
@@ -35,7 +37,7 @@ the publication-ready and (in my opinion) highly aesthetic choropleth.
     -   [Better colors for classes](#better-colors-for-classes)
 -   [Relief](#relief)
 -   [Final map](#final-map)
-    
+
 Reproducibility {#reproducibility}
 ---------------
 
@@ -154,8 +156,9 @@ theme_map <- function(...) {
     axis.ticks = element_blank(),
     axis.title.x = element_blank(),
     axis.title.y = element_blank(),
-    panel.grid.minor = element_line(color = "#ebebe5", size = 0.2),
+    # panel.grid.minor = element_line(color = "#ebebe5", size = 0.2),
     panel.grid.major = element_line(color = "#ebebe5", size = 0.2),
+    panel.grid.minor = element_blank(),
     plot.background = element_rect(fill = "#f5f5f2", color = NA), 
     panel.background = element_rect(fill = "#f5f5f2", color = NA), 
     legend.background = element_rect(fill = "#f5f5f2", color = NA),
@@ -185,8 +188,8 @@ For this choropleth, I used **three** data sources:
     from the FSO, but not freely available. You could also use the
     freely available [political
     boundaries](https://www.bfs.admin.ch/bfs/de/home/dienstleistungen/geostat/geodaten-bundesstatistik/administrative-grenzen/generalisierte-gemeindegrenzen.html)
-    of course. I was allowed to republish the Shapefile for this educational 
-    purpose, though (also included in the `input` folder). 
+    of course. I was allowed to republish the Shapefile for this
+    educational purpose, though (also included in the `input` folder).
     Please stick to that policy.
 -   Relief: This is a freely available GeoTIFF from [The Swiss Federal
     Office of
@@ -328,7 +331,7 @@ q
 
 <img src="wp-content/uploads/2016/12/tm-basic-map-viridis-horizontal-1.png" width="100%" />
 
-Well, the plot now has a weird 1:1 aspect ratio, but okay...
+Well, the plot now has a weird aspect ratio, but okay...
 
 Discrete classes with quantile scale {#discrete-classes-with-quantile-scale}
 ------------------------------------
@@ -708,8 +711,8 @@ p <- ggplot() +
                                                    unit = "cm"), 
                                    debug = F),
       legend.title = element_text(size = 8),
-      plot.margin = unit(c(.4,.4,.2,.4), "cm"),
-      panel.spacing = unit(c(-.1,0,.2,0), "cm"),
+      plot.margin = unit(c(.5,.5,.2,.5), "cm"),
+      panel.spacing = unit(c(-.1,0.2,.2,0.2), "cm"),
       panel.border = element_blank(),
       plot.caption = element_text(size = 6, 
                                   hjust = 0.92, 
@@ -746,3 +749,20 @@ extendLegendWithExtremes(p)
 ```
 
 <img src="wp-content/uploads/2016/12/tm-final-map-1.png" width="100%" />
+
+Thanks for reading, I hope you learned something. Producing high-quality
+graphics like these with pure `ggplot2` is sometimes more an art than a
+science and veeeeeeeryyyyy tedious, and it would probably be way easier
+to export the map at an early stage and make adjustments in Illustrator
+or another vector editor. But then, I just like the thought of a fully
+automagic, reproducible workflow, it's almost an obsession. The big
+challenge here is to put everything into a more versatile function, or
+even a package, that can produce maps like these with arbitrary scales
+(discrete, continuous, quantiles, pretty breaks, whatever) and arbitrary
+geo data (for the US, for example).
+
+If you think this example can be improved in any way, please use the
+comment function below. I'd also be very happy to see this map adapted
+to other geographic regions and/or other datasets.
+
+As always: Follow me on [Twitter](https://twitter.com/grssnbchr)!

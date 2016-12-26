@@ -119,8 +119,9 @@ theme_map <- function(...) {
     axis.ticks = element_blank(),
     axis.title.x = element_blank(),
     axis.title.y = element_blank(),
-    panel.grid.minor = element_line(color = "#ebebe5", size = 0.2),
+    # panel.grid.minor = element_line(color = "#ebebe5", size = 0.2),
     panel.grid.major = element_line(color = "#ebebe5", size = 0.2),
+    panel.grid.minor = element_blank(),
     plot.background = element_rect(fill = "#f5f5f2", color = NA), 
     panel.background = element_rect(fill = "#f5f5f2", color = NA), 
     legend.background = element_rect(fill = "#f5f5f2", color = NA),
@@ -246,7 +247,7 @@ q <- p +
 q
 ```
 
-Well, the plot now has a weird 1:1 aspect ratio, but okay... 
+Well, the plot now has a weird aspect ratio, but okay... 
 
 ## Discrete classes with quantile scale
 
@@ -581,8 +582,8 @@ p <- ggplot() +
                                                    unit = "cm"), 
                                    debug = F),
       legend.title = element_text(size = 8),
-      plot.margin = unit(c(.4,.4,.2,.4), "cm"),
-      panel.spacing = unit(c(-.1,0,.2,0), "cm"),
+      plot.margin = unit(c(.5,.5,.2,.5), "cm"),
+      panel.spacing = unit(c(-.1,0.2,.2,0.2), "cm"),
       panel.border = element_blank(),
       plot.caption = element_text(size = 6, 
                                   hjust = 0.92, 
@@ -618,3 +619,8 @@ p <- ggplot() +
 extendLegendWithExtremes(p)
 ```
 
+Thanks for reading, I hope you learned something. Producing high-quality graphics like these with pure `ggplot2` is sometimes more an art than a science and veeeeeeeryyyyy tedious, and it would probably be way easier to export the map at an early stage and make adjustments in Illustrator or another vector editor. But then, I just like the thought of a fully automagic, reproducible workflow, it's almost an obsession. The big challenge here is to put everything into a more versatile function, or even a package, that can produce maps like these with arbitrary scales (discrete, continuous, quantiles, pretty breaks, whatever) and arbitrary geo data (for the US, for example).
+
+If you think this example can be improved in any way, please use the comment function below. I'd also be very happy to see this map adapted to other geographic regions and/or other datasets. 
+
+As always: Follow me on [Twitter](https://twitter.com/grssnbchr)! 
