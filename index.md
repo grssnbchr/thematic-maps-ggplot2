@@ -1,5 +1,5 @@
 
-<img src="/wp-content/uploads/2016/12/tm-final-map-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-final-map-1.png" width="100%" />
 
 The above *choropleth* was created with `ggplot2` (2.2.0) only. Well,
 almost. Of course, you need the usual suspects such as `rgdal` and
@@ -10,8 +10,6 @@ packages are kept to an absolute minimum.
 In this blog post, I am going to explain step by step how I (eventually)
 achieved this result – from a very basic, useless, ugly, default map to
 the publication-ready and (in my opinion) highly aesthetic choropleth.
-
-**Table of contents**:
 
 -   [Reproducibility](#reproducibility)
 -   [Preparations](#preparations)
@@ -45,7 +43,7 @@ main file to execute is `index.Rmd`. Right now, knitting it produces an
 `index.md` that I use for my blog post on
 [timogrossenbacher.ch](https://timogrossenbacher.ch), but you can adapt
 the script to produce an HTML file, too. The PNGs produced herein are
-saved to `/wp-content/uploads/2016/12` so I can display them directly in
+saved to `wp-content/uploads/2016/12` so I can display them directly in
 my blog, but of course you can also adjust this.
 
 Preparations {#preparations}
@@ -54,7 +52,7 @@ Preparations {#preparations}
 ### Clear workspace and install necessary packages {#clear-workspace-and-install-necessary-packages}
 
 This is just my usual routine: Detach all packages, remove all variables
-in the global environment, etc, and then load the packages. Saves my a
+in the global environment, etc, and then load the packages. Saves me a
 lot of headaches.
 
 ``` r
@@ -63,7 +61,7 @@ knitr::opts_chunk$set(
     dpi = 300,
     fig.width = 8,
     fig.height = 6,
-    fig.path = '/wp-content/uploads/2016/12/tm-',
+    fig.path = 'wp-content/uploads/2016/12/tm-',
     strip.white = T,
     dev = "png",
     dev.args = list(png = list(bg = "transparent"))
@@ -176,17 +174,16 @@ For this choropleth, I used **three** data sources:
 -   Municipality geometries: The geometries do not show the political
     borders of Swiss municipalities, but the so-called "productive"
     area, i.e., larger lakes and other "unproductive" areas such as
-    mountains are excluded. This has too advantages: 1) The relatively
+    mountains are excluded. This has two advantages: 1) The relatively
     sparsely populated but very large municipalities in the Alps don't
-    have too much visual weight and 2) it allows to use the beautiful
-    raster relief of the Alps as a background (I don' know, but I just
-    like it, probably because I am a geographer...). The data are also
-    from the FSO, but not freely available. You could also use the
-    freely available [political
+    have too much visual weight and 2) it allows us to use the beautiful
+    raster relief of the Alps as a background. The data are also from
+    the FSO, but not freely available. You could also use the freely
+    available [political
     boundaries](https://www.bfs.admin.ch/bfs/de/home/dienstleistungen/geostat/geodaten-bundesstatistik/administrative-grenzen/generalisierte-gemeindegrenzen.html)
     of course. I was allowed to republish the Shapefile for this
-    educational purpose, though (also included in the `input` folder).
-    Please stick to that policy.
+    educational purpose (also included in the `input` folder). Please
+    stick to that policy.
 -   Relief: This is a freely available GeoTIFF from [The Swiss Federal
     Office of
     Topography (swisstopo)](https://shop.swisstopo.admin.ch/en/products/maps/national/digital/srm1000).
@@ -201,9 +198,9 @@ data <- read.csv("input/avg_age_15.csv", stringsAsFactors = F)
 
 Here, the geodata is loaded using `rgeos` / `rgdal` standard procedures.
 It is then *"fortified"*, i.e. transformed into a ggplot2-compatible
-form (the `fortify`-function is part of `ggplot2`). Also, the thematic
-data is joined using the `bfs_id` field (each municipality as a unique
-one).
+data frame (the `fortify`-function is part of `ggplot2`). Also, the
+thematic data is joined using the `bfs_id` field (each municipality has
+a unique one).
 
 ``` r
 gde_15 <- readOGR("input/geodata/gde-1-1-15.shp", layer = "gde-1-1-15")
@@ -275,7 +272,7 @@ p <- ggplot() +
 p
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-basic-map-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-basic-map-1.png" width="100%" />
 
 How ugly! The color scale is not very sensitive to the data at hand,
 i.e., regional patterns cannot be detected at all.
@@ -296,7 +293,7 @@ q <- p + scale_fill_viridis(option = "magma", direction = -1)
 q
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-basic-map-viridis-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-basic-map-viridis-1.png" width="100%" />
 
 ### Horizontal legend {#horizontal-legend}
 
@@ -325,7 +322,7 @@ q <- p +
 q
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-basic-map-viridis-horizontal-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-basic-map-viridis-horizontal-1.png" width="100%" />
 
 Well, the plot now has a weird aspect ratio, but okay...
 
@@ -397,7 +394,7 @@ p <- ggplot() +
 p
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-basic-map-viridis-horizontal-quantile-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-basic-map-viridis-horizontal-quantile-1.png" width="100%" />
 
 Wow! Now that is some regional variability ;-). But there is still a
 huge caveat: In my opinion, quantile scales are optimal at showing
@@ -489,7 +486,7 @@ q <- p +
 q
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-discrete-classes-pretty-breaks-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-discrete-classes-pretty-breaks-1.png" width="100%" />
 
 Now we have classes with the ranges 33.06 to 39, 39 to 40, 40 to 41, and
 so on... So four classes are of the same size and the two classes with
@@ -557,7 +554,7 @@ extendLegendWithExtremes <- function(p){
 extendLegendWithExtremes(q)
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-discrete-classes-better-legend-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-discrete-classes-better-legend-1.png" width="100%" />
 
 ### Better colors for classes {#better-colors-for-classes}
 
@@ -592,7 +589,7 @@ p <- p + scale_fill_manual(
 extendLegendWithExtremes(p)
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-discrete-classes-better-colors-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-discrete-classes-better-colors-1.png" width="100%" />
 
 A beauty!
 
@@ -605,7 +602,8 @@ the Swiss Alps. Every mountain lover will appreciate that.
 I add the relief with `geom_raster`. Now the problem is that I can't use
 the `fill` aesthetic because it (or its scale) is already in use by the
 `geom_polygon` layer. The workaround is using the `alpha` aesthetic
-which works fine here because the relief uses a greyscale anyway.
+which works fine here because the relief should be displayed with a
+greyscale anyway.
 
 ``` r
 p <- ggplot() +
@@ -656,7 +654,7 @@ p <- ggplot() +
 extendLegendWithExtremes(p)
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-with-relief-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-with-relief-1.png" width="100%" />
 
 Final map {#final-map}
 ---------
@@ -744,7 +742,7 @@ p <- ggplot() +
 extendLegendWithExtremes(p)
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-final-map-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-final-map-1.png" width="100%" />
 
 Thanks for reading, I hope you learned something. Producing high-quality
 graphics like these with pure `ggplot2` is sometimes more an art than a

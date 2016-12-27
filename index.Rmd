@@ -26,7 +26,7 @@ As always, you can reproduce, reuse and remix everything you find here, just go 
 
 ### Clear workspace and install necessary packages
 
-This is just my usual routine: Detach all packages, remove all variables in the global environment, etc, and then load the packages. Saves my a lot of headaches.
+This is just my usual routine: Detach all packages, remove all variables in the global environment, etc, and then load the packages. Saves me a lot of headaches.
 
 ```{r cleanup, echo=TRUE, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(
@@ -137,7 +137,7 @@ theme_map <- function(...) {
 For this choropleth, I used **three** data sources:
 
 * Thematic data: Average age per municipality as of end of 2015. The data is freely available from [The Swiss Federal Statistical Office (FSO)](https://www.bfs.admin.ch/bfs/de/home/statistiken/bevoelkerung/stand-entwicklung/alter-zivilstand-staatsangehoerigkeit.html) and included in the `input` folder.
-* Municipality geometries: The geometries do not show the political borders of Swiss municipalities, but the so-called "productive" area, i.e., larger lakes and other "unproductive" areas such as mountains are excluded. This has too advantages: 1) The relatively sparsely populated but very large municipalities in the Alps don't have too much visual weight and 2) it allows to use the beautiful raster relief of the Alps as a background (I don' know, but I just like it, probably because I am a geographer...). The data are also from the FSO, but not freely available. You could also use the freely available [political boundaries](https://www.bfs.admin.ch/bfs/de/home/dienstleistungen/geostat/geodaten-bundesstatistik/administrative-grenzen/generalisierte-gemeindegrenzen.html) of course. I was allowed to republish the Shapefile for this educational purpose, though (also included in the `input` folder). Please stick to that policy.
+* Municipality geometries: The geometries do not show the political borders of Swiss municipalities, but the so-called "productive" area, i.e., larger lakes and other "unproductive" areas such as mountains are excluded. This has two advantages: 1) The relatively sparsely populated but very large municipalities in the Alps don't have too much visual weight and 2) it allows us to use the beautiful raster relief of the Alps as a background. The data are also from the FSO, but not freely available. You could also use the freely available [political boundaries](https://www.bfs.admin.ch/bfs/de/home/dienstleistungen/geostat/geodaten-bundesstatistik/administrative-grenzen/generalisierte-gemeindegrenzen.html) of course. I was allowed to republish the Shapefile for this educational purpose (also included in the `input` folder). Please stick to that policy.
 * Relief: This is a freely available GeoTIFF from [The Swiss Federal Office of Topography (swisstopo)](https://shop.swisstopo.admin.ch/en/products/maps/national/digital/srm1000).
 
 ### Read in data and preprocess
@@ -149,8 +149,8 @@ data <- read.csv("input/avg_age_15.csv", stringsAsFactors = F)
 ### Read in geodata
 
 Here, the geodata is loaded using `rgeos` / `rgdal` standard procedures. 
-It is then *"fortified"*, i.e. transformed into a ggplot2-compatible form (the `fortify`-function is part of `ggplot2`).
-Also, the thematic data is joined using the `bfs_id` field (each municipality as a unique one).
+It is then *"fortified"*, i.e. transformed into a ggplot2-compatible data frame (the `fortify`-function is part of `ggplot2`).
+Also, the thematic data is joined using the `bfs_id` field (each municipality has a unique one).
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE}
 gde_15 <- readOGR("input/geodata/gde-1-1-15.shp", layer = "gde-1-1-15")
@@ -487,7 +487,7 @@ A beauty!
 
 What's needed now to give it a boost of aesthetic value is the relief of the Swiss Alps. Every mountain lover will appreciate that.
 
-I add the relief with `geom_raster`. Now the problem is that I can't use the `fill` aesthetic because it (or its scale) is already in use by the `geom_polygon` layer. The workaround is using the `alpha` aesthetic which works fine here because the relief uses a greyscale anyway.
+I add the relief with `geom_raster`. Now the problem is that I can't use the `fill` aesthetic because it (or its scale) is already in use by the `geom_polygon` layer. The workaround is using the `alpha` aesthetic which works fine here because the relief should be displayed with a greyscale anyway.
 
 ```{r with-relief, message=TRUE, warning=FALSE}
 p <- ggplot() +
