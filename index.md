@@ -878,7 +878,10 @@ classes' ranges are now a bit more similar, but of course, the first is
 still a lot smaller than the last. I would say the disadvantage of this
 approach is that now some "visual balance" between both extremes is
 lost, mostly due to the fact that a lot of municipalities have an
-average age below 40 years.
+average age below 40 years. However, it has the other advantage that 
+the really "old" municipalities at the far-right of the scale can now 
+be more easily identified.
+
 
 At this point, it might make sense to look at the histogram of the
 municipalities:
