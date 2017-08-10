@@ -1,4 +1,32 @@
-<img src="/wp-content/uploads/2016/12/tm-final-map-1.png" width="100%" />
+-   [Beautiful thematic maps with
+    ggplot2 (only)](#beautiful-thematic-maps-with-ggplot2-only)
+    -   [Reproducibility](#reproducibility)
+    -   [Preparations](#preparations)
+        -   [Clear workspace and install necessary
+            packages](#clear-workspace-and-install-necessary-packages)
+        -   [General ggplot2 theme for
+            map](#general-ggplot2-theme-for-map)
+    -   [Data sources](#data-sources)
+        -   [Read in data and preprocess](#read-in-data-and-preprocess)
+        -   [Read in geodata](#read-in-geodata)
+    -   [A very basic map](#a-very-basic-map)
+        -   [A better color scale](#a-better-color-scale)
+        -   [Horizontal legend](#horizontal-legend)
+    -   [Discrete classes with quantile
+        scale](#discrete-classes-with-quantile-scale)
+        -   [Discrete classes with pretty
+            breaks](#discrete-classes-with-pretty-breaks)
+        -   [More intuitive legend](#more-intuitive-legend)
+        -   [Better colors for classes](#better-colors-for-classes)
+    -   [Relief](#relief)
+    -   [Final map](#final-map)
+    -   [Update, January 2nd, 2017](#update-january-2nd-2017)
+    -   [Data in a barchart](#data-in-a-barchart)
+
+Beautiful thematic maps with ggplot2 (only) {#beautiful-thematic-maps-with-ggplot2-only}
+===========================================
+
+<img src="wp-content/uploads/2016/12/tm-final-map-1.png" width="100%" />
 
 The above *choropleth* was created with `ggplot2` (2.2.0) only. Well,
 almost. Of course, you need the usual suspects such as `rgdal` and
@@ -9,28 +37,6 @@ packages are kept to an absolute minimum.
 In this blog post, I am going to explain step by step how I (eventually)
 achieved this result – from a very basic, useless, ugly, default map to
 the publication-ready and (in my opinion) highly aesthetic choropleth.
-
--   [Reproducibility](#reproducibility)
--   [Preparations](#preparations)
-    -   [Clear workspace and install necessary
-        packages](#clear-workspace-and-install-necessary-packages)
-    -   [General ggplot2 theme for
-        map](#general-ggplot2-theme-for-map)
--   [Data sources](#data-sources)
-    -   [Read in data and preprocess](#read-in-data-and-preprocess)
-    -   [Read in geodata](#read-in-geodata)
--   [A very basic map](#a-very-basic-map)
-    -   [A better color scale](#a-better-color-scale)
-    -   [Horizontal legend](#horizontal-legend)
--   [Discrete classes with quantile
-    scale](#discrete-classes-with-quantile-scale)
-    -   [Discrete classes with pretty
-        breaks](#discrete-classes-with-pretty-breaks)
-    -   [More intuitive legend](#more-intuitive-legend)
-    -   [Better colors for classes](#better-colors-for-classes)
--   [Relief](#relief)
--   [Final map](#final-map)
--   [Update, January 2nd, 2017](#update-january-2nd-2017)
 
 Reproducibility {#reproducibility}
 ---------------
@@ -43,7 +49,7 @@ main file to execute is `index.Rmd`. Right now, knitting it produces an
 `index.md` that I use for my blog post on
 [timogrossenbacher.ch](https://timogrossenbacher.ch), but you can adapt
 the script to produce an HTML file, too. The PNGs produced herein are
-saved to `/wp-content/uploads/2016/12` so I can display them directly in
+saved to `wp-content/uploads/2016/12` so I can display them directly in
 my blog, but of course you can also adjust this.
 
 Preparations {#preparations}
@@ -61,7 +67,7 @@ knitr::opts_chunk$set(
     dpi = 300,
     fig.width = 8,
     fig.height = 6,
-    fig.path = '/wp-content/uploads/2016/12/tm-',
+    fig.path = 'wp-content/uploads/2016/12/tm-',
     strip.white = T,
     dev = "png",
     dev.args = list(png = list(bg = "transparent"))
@@ -125,6 +131,14 @@ if(!require(gtable)) {
 if(!require(grid)) {
   install.packages("grid", repos = "https://cloud.r-project.org/")
   require(grid)
+}
+if(!require(readxl)) {
+  install.packages("readxl", repos = "https://cloud.r-project.org/")
+  require(readxl)
+}
+if(!require(magrittr)) {
+  install.packages("magrittr", repos = "https://cloud.r-project.org/")
+  require(magrittr)
 }
 ```
 
@@ -222,6 +236,23 @@ map_data_fortified <- fortify(gde_15, region = "BFS_ID") %>%
 # now we join the thematic data
 map_data <- map_data_fortified %>% left_join(data, by = c("id" = "bfs_id"))
 
+# whole municipalities
+gde_15_political <- readOGR("input/geodata/g1g15.shp", layer = "g1g15")
+```
+
+    ## OGR data source with driver: ESRI Shapefile 
+    ## Source: "input/geodata/g1g15.shp", layer: "g1g15"
+    ## with 2328 features
+    ## It has 20 fields
+
+``` r
+crs(gde_15_political) <- "+proj=somerc +lat_0=46.95240555555556 
++lon_0=7.439583333333333 +k_0=1 +x_0=600000 +y_0=200000 
++ellps=bessel +towgs84=674.374,15.056,405.346,0,0,0,0 +units=m +no_defs"
+map_data_political_fortified <- fortify(gde_15_political, region = "GMDNR") %>% 
+  mutate(id = as.numeric(id))
+map_data_political <- map_data_political_fortified %>% left_join(data, by = c("id" = "bfs_id"))
+map_data_political <- map_data_political[complete.cases(map_data_political),]
 # read in background relief
 relief <- raster("input/geodata/02-relief-georef-clipped-resampled.tif")
 relief_spdf <- as(relief, "SpatialPixelsDataFrame")
@@ -236,6 +267,7 @@ relief <- as.data.frame(relief_spdf) %>%
 rm(relief_spdf)
 rm(gde_15)
 rm(map_data_fortified)
+rm(map_data_political_fortified)
 ```
 
 A very basic map {#a-very-basic-map}
@@ -272,7 +304,7 @@ p <- ggplot() +
 p
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-basic-map-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-basic-map-1.png" width="100%" />
 
 How ugly! The color scale is not very sensitive to the data at hand,
 i.e., regional patterns cannot be detected at all.
@@ -293,7 +325,7 @@ q <- p + scale_fill_viridis(option = "magma", direction = -1)
 q
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-basic-map-viridis-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-basic-map-viridis-1.png" width="100%" />
 
 ### Horizontal legend {#horizontal-legend}
 
@@ -322,7 +354,7 @@ q <- p +
 q
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-basic-map-viridis-horizontal-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-basic-map-viridis-horizontal-1.png" width="100%" />
 
 Well, the plot now has a weird aspect ratio, but okay...
 
@@ -394,7 +426,7 @@ p <- ggplot() +
 p
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-basic-map-viridis-horizontal-quantile-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-basic-map-viridis-horizontal-quantile-1.png" width="100%" />
 
 Wow! Now that is some regional variability ;-). But there is still a
 huge caveat: In my opinion, quantile scales are optimal at showing
@@ -486,7 +518,7 @@ q <- p +
 q
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-discrete-classes-pretty-breaks-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-discrete-classes-pretty-breaks-1.png" width="100%" />
 
 Now we have classes with the ranges 33.06 to 39, 39 to 40, 40 to 41, and
 so on... So four classes are of the same size and the two classes with
@@ -554,7 +586,7 @@ extendLegendWithExtremes <- function(p){
 extendLegendWithExtremes(q)
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-discrete-classes-better-legend-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-discrete-classes-better-legend-1.png" width="100%" />
 
 ### Better colors for classes {#better-colors-for-classes}
 
@@ -589,7 +621,7 @@ p <- p + scale_fill_manual(
 extendLegendWithExtremes(p)
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-discrete-classes-better-colors-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-discrete-classes-better-colors-1.png" width="100%" />
 
 A beauty!
 
@@ -654,7 +686,7 @@ p <- ggplot() +
 extendLegendWithExtremes(p)
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-with-relief-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-with-relief-1.png" width="100%" />
 
 Final map {#final-map}
 ---------
@@ -742,7 +774,7 @@ p <- ggplot() +
 extendLegendWithExtremes(p)
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-final-map-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-final-map-1.png" width="100%" />
 
 Thanks for reading, I hope you learned something. Producing high-quality
 graphics like these with pure `ggplot2` is sometimes more an art than a
@@ -869,7 +901,7 @@ p <- ggplot() +
 extendLegendWithExtremes(p)
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-final-map-different-scale-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-final-map-different-scale-1.png" width="100%" />
 
 Notice that I extended the range of the first class from 33.06-39 to
 33.06-40 and that, now, the classes in the "middle" have a range of two
@@ -878,10 +910,9 @@ classes' ranges are now a bit more similar, but of course, the first is
 still a lot smaller than the last. I would say the disadvantage of this
 approach is that now some "visual balance" between both extremes is
 lost, mostly due to the fact that a lot of municipalities have an
-average age below 40 years. However, it has the other advantage that 
-the really "old" municipalities at the far-right of the scale can now 
-be more easily identified.
-
+average age below 40 years. However, it has the other advantage that the
+really "old" municipalities at the far-right of the scale can now be
+more easily identified.
 
 At this point, it might make sense to look at the histogram of the
 municipalities:
@@ -894,7 +925,7 @@ ggplot(data = data, aes(x = avg_age_15)) +
   ylab("Count")
 ```
 
-<img src="/wp-content/uploads/2016/12/tm-histogram-1.png" width="100%" />
+<img src="wp-content/uploads/2016/12/tm-histogram-1.png" width="100%" />
 
 As you can see, the municipalities are almost normally distributed, with
 most municipalities being in the range between 39 and 43 years (&gt;75%,
@@ -939,4 +970,38 @@ script in the first place:
     loaded via a namespace (and not attached):
      [1] Rcpp_0.12.7      knitr_1.14       magrittr_1.5     maptools_0.8-40  munsell_0.4.3    colorspace_1.2-6 lattice_0.20-34 
      [8] R6_2.1.3         plyr_1.8.4       tools_3.3.1      DBI_0.5-1        digest_0.6.10    lazyeval_0.2.0   assertthat_0.1  
-    [15] tibble_1.2       gridExtra_2.2.1  formatR_1.4      labeling_0.3     scales_0.4.1     foreign_0.8-66
+    [15] tibble_1.2       gridExtra_2.2.1  formatR_1.4      labeling_0.3     scales_0.4.1     foreign_0.8-66  
+
+Data in a barchart {#data-in-a-barchart}
+------------------
+
+``` r
+rgs <- read_excel("input/be-b-00.04-rgs-15.xls", skip = 16, col_names = F) %>% 
+    select(bfs_id = X__1, NAME = X__2)
+data_sorted <- data %>% left_join(rgs) %>% arrange(desc(avg_age_15))
+```
+
+    ## Joining, by = "bfs_id"
+
+``` r
+data_to_plot <- data %>% left_join(rgs)
+```
+
+    ## Joining, by = "bfs_id"
+
+``` r
+data_to_plot %<>% mutate(NAME = factor(NAME, levels = data_sorted$NAME))
+
+p <- ggplot(data_to_plot, aes(y = avg_age_15, x = NAME)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gemeinde", y = "Durchschnittsalter 2015") +
+  theme_minimal() +
+  theme(axis.text = element_text(size = 7))+
+  xlim(data_sorted[2315:2324,]$NAME) +
+  ylim(c(0,70)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+ggsave(p, filename = "output/unteres_extrem.png", width = 8, height = 3)
+```
+
+    ## Warning: Removed 2314 rows containing missing values (position_stack).

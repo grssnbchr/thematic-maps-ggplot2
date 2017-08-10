@@ -99,6 +99,14 @@ if(!require(grid)) {
   install.packages("grid", repos = "https://cloud.r-project.org/")
   require(grid)
 }
+if(!require(readxl)) {
+  install.packages("readxl", repos = "https://cloud.r-project.org/")
+  require(readxl)
+}
+if(!require(magrittr)) {
+  install.packages("magrittr", repos = "https://cloud.r-project.org/")
+  require(magrittr)
+}
 ```
 
 ### General ggplot2 theme for map
@@ -164,6 +172,15 @@ map_data_fortified <- fortify(gde_15, region = "BFS_ID") %>%
 # now we join the thematic data
 map_data <- map_data_fortified %>% left_join(data, by = c("id" = "bfs_id"))
 
+# whole municipalities
+gde_15_political <- readOGR("input/geodata/g1g15.shp", layer = "g1g15")
+crs(gde_15_political) <- "+proj=somerc +lat_0=46.95240555555556 
++lon_0=7.439583333333333 +k_0=1 +x_0=600000 +y_0=200000 
++ellps=bessel +towgs84=674.374,15.056,405.346,0,0,0,0 +units=m +no_defs"
+map_data_political_fortified <- fortify(gde_15_political, region = "GMDNR") %>% 
+  mutate(id = as.numeric(id))
+map_data_political <- map_data_political_fortified %>% left_join(data, by = c("id" = "bfs_id"))
+map_data_political <- map_data_political[complete.cases(map_data_political),]
 # read in background relief
 relief <- raster("input/geodata/02-relief-georef-clipped-resampled.tif")
 relief_spdf <- as(relief, "SpatialPixelsDataFrame")
@@ -178,6 +195,7 @@ relief <- as.data.frame(relief_spdf) %>%
 rm(relief_spdf)
 rm(gde_15)
 rm(map_data_fortified)
+rm(map_data_political_fortified)
 ```
 
 ## A very basic map
@@ -769,3 +787,25 @@ loaded via a namespace (and not attached):
  [8] R6_2.1.3         plyr_1.8.4       tools_3.3.1      DBI_0.5-1        digest_0.6.10    lazyeval_0.2.0   assertthat_0.1  
 [15] tibble_1.2       gridExtra_2.2.1  formatR_1.4      labeling_0.3     scales_0.4.1     foreign_0.8-66  
 ```
+
+## Data in a barchart
+
+```{r}
+rgs <- read_excel("input/be-b-00.04-rgs-15.xls", skip = 16, col_names = F) %>% 
+    select(bfs_id = X__1, NAME = X__2)
+data_sorted <- data %>% left_join(rgs) %>% arrange(desc(avg_age_15))
+data_to_plot <- data %>% left_join(rgs)
+data_to_plot %<>% mutate(NAME = factor(NAME, levels = data_sorted$NAME))
+
+p <- ggplot(data_to_plot, aes(y = avg_age_15, x = NAME)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gemeinde", y = "Durchschnittsalter 2015") +
+  theme_minimal() +
+  theme(axis.text = element_text(size = 7))+
+  xlim(data_sorted[2315:2324,]$NAME) +
+  ylim(c(0,70)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+ggsave(p, filename = "output/unteres_extrem.png", width = 8, height = 3)
+```
+
