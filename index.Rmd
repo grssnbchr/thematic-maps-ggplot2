@@ -34,7 +34,7 @@ knitr::opts_chunk$set(
 	dpi = 300,
 	fig.width = 8,
 	fig.height = 6,
-	fig.path = 'wp-content/uploads/2016/12/tm-',
+	fig.path = 'https://timogrossenbacher.ch/wp-content/uploads/2016/12/tm-',
 	strip.white = T,
 	dev = "png",
 	dev.args = list(png = list(bg = "transparent"))
